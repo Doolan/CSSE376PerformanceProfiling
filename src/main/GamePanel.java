@@ -71,18 +71,25 @@ public class GamePanel extends JPanel implements Runnable, KeyListener {
 	@Override
 	public void run() {
 		initialize();
-
+		int count = 0;
 		// Main game loop.
 		while (true) {
 			if (!this.isRunning) {
 				break;
 			}
-
+			long startTime = System.nanoTime();
 			// Run the basics.
 			update();
 			render();
 			draw();
-
+			if (count != 50)
+				count++;
+			else {
+				count = 0;
+				long endTime = System.nanoTime();
+				long fps = 1000000000L / (endTime - startTime);
+				System.err.println(fps);
+			}
 			try {
 				Thread.sleep(this.targetTime);
 			} catch (Exception e) {
