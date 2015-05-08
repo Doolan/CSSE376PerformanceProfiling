@@ -67,6 +67,8 @@ public class Level {
 																	// boxes.
 	private ArrayList<Gold> goldObjects; // The arraylist of Gold objects.
 	private HashMap<Integer, BufferedImage> images; // Hashmap of tile images.
+	private ArrayList<Integer> dirtyTiles = new ArrayList<Integer>();
+	private boolean backgroundDrawn = false;
 
 	/**
 	 * Constructs a Level object with given tileSize that searches for a
@@ -331,12 +333,27 @@ public class Level {
 		int currentPosition;
 		// cache the tile background in an image so tiles don't need to be drawn again and again redundantly.
 		Graphics2D g = img.createGraphics();
-		for (int r = 0; r < this.map.length; r++) {
-			for (int c = 0; c < this.map[r].length; c++) {
-				currentPosition = this.map[r][c];
-				drawTileImage(currentPosition, r, c, g);
+		
+		//draw background the first time
+		if(!backgroundDrawn){
+			for (int r = 0; r < this.map.length; r++) {
+				for (int c = 0; c < this.map[r].length; c++) {
+					currentPosition = this.map[r][c];
+					drawTileImage(currentPosition, r, c, g);
+				}
 			}
+			backgroundDrawn = true;
 		}
+		//update dirty tiles
+		if(!dirtyTiles.isEmpty()){
+			for(int i = 0; i<dirtyTiles.size(); i+=2){
+				currentPosition = this.map[dirtyTiles.get(i)][dirtyTiles.get(i+1)];
+				drawTileImage(currentPosition, dirtyTiles.get(i), dirtyTiles.get(i+1), g);
+			}
+			this.dirtyTiles = new ArrayList<Integer>();
+		}
+		
+		
 		g.dispose();
 		// draw cached tiles
 		g2.drawImage(img, 0, 0, img.getWidth(), img.getHeight(), null);
@@ -384,6 +401,8 @@ public class Level {
 	 */
 	public void updateTile(int x, int y, int tileID) {
 		this.map[x][y] = tileID;
+		dirtyTiles.add(x);
+		dirtyTiles.add(y);
 	}
 
 	/**
